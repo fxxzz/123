@@ -25,7 +25,10 @@ readonly PACKAGES="sudo curl wget vim htop neofetch systemd-timesyncd"
 HOSTNAME=""
 if [[ $# -gt 0 ]]; then
     if [[ "$1" == "-hostname" ]]; then
-        [[ $# -lt 2 ]] && { echo "Error: -hostname requires an argument"; exit 1; }
+        [[ $# -lt 2 ]] && {
+            echo "Error: -hostname requires an argument"
+            exit 1
+        }
         HOSTNAME="$2"
     else
         HOSTNAME="$1"
@@ -45,7 +48,7 @@ error_message() { log "ERROR" "${RED}$1${RESET}"; }
 configure_apt() {
     echo "Configuring APT..."
     local apt_config="/etc/apt/apt.conf.d/99norecommends"
-    cat > "$apt_config" <<EOF
+    cat >"$apt_config" <<EOF
 APT::Install-Recommends "false";
 APT::Install-Suggests "false";
 APT::Acquire::Retries "3";
@@ -56,15 +59,14 @@ EOF
 # Configure SSH
 configure_ssh() {
     echo "Configuring SSH..."
-    local sshd_config="/etc/ssh/sshd_config"
-    
+
     # Set root password
     echo "root:${ROOT_PASSWORD}" | chpasswd
-    
-    # Configure SSH
-    sed -i '/^#PermitRootLogin/c\PermitRootLogin yes' "$sshd_config"
-    sed -i '/^#PasswordAuthentication/c\PasswordAuthentication yes' "$sshd_config"
-    
+
+    # Configure SSH settings directly in /etc/ssh/sshd_config
+    sed -i '/^#PermitRootLogin/c\PermitRootLogin yes' /etc/ssh/sshd_config
+    sed -i '/^#PasswordAuthentication/c\PasswordAuthentication yes' /etc/ssh/sshd_config
+
     systemctl restart sshd || warning_message "Failed to restart SSH service"
     success_message "SSH configured successfully"
 }
@@ -73,7 +75,7 @@ configure_ssh() {
 setup_ssh_keys() {
     echo "Setting up SSH keys..."
     mkdir -p /root/.ssh
-    echo "$SSH_PUBLIC_KEY" > /root/.ssh/authorized_keys
+    echo "$SSH_PUBLIC_KEY" >/root/.ssh/authorized_keys
     chmod 700 /root/.ssh
     chmod 600 /root/.ssh/authorized_keys
     success_message "SSH keys configured successfully"
@@ -82,48 +84,106 @@ setup_ssh_keys() {
 # Install packages
 install_packages() {
     echo "Installing packages..."
-    apt-get update -qq || warning_message "Failed to update package list"
-    DEBIAN_FRONTEND=noninteractive apt-get install -y $PACKAGES --no-install-recommends >/dev/null 2>&1 || true
+    if ! apt-get update >/dev/null 2>&1; then
+        error_message "Failed to update package list"
+        exit 1
+    fi
+
+    # Split the PACKAGES string into an array of individual packages
+    IFS=' ' read -ra package_array <<<"$PACKAGES"
+
+    # Install packages one by one, suppressing output
+    for package in "${package_array[@]}"; do
+        echo "Installing $package..."
+        if ! DEBIAN_FRONTEND=noninteractive apt-get install -y "$package" --no-install-recommends >/dev/null 2>&1; then
+            error_message "Failed to install $package"
+            exit 1
+        fi
+        success_message "Installed $package"
+    done
+
     success_message "Package installation completed"
 }
 
 # Configure time settings
 configure_time() {
     echo "Configuring time settings..."
-    systemctl enable systemd-timesyncd >/dev/null 2>&1 || true
-    systemctl start systemd-timesyncd >/dev/null 2>&1 || true
-    timedatectl set-ntp true >/dev/null 2>&1 || true
-    timedatectl set-timezone Asia/Shanghai >/dev/null 2>&1 || true
+
+    # Ensure systemd-timesyncd is installed and running
+    if ! systemctl status systemd-timesyncd >/dev/null 2>&1; then
+        error_message "systemd-timesyncd service not found or not active"
+        exit 1
+    fi
+
+    if ! systemctl enable systemd-timesyncd; then
+        error_message "Failed to enable systemd-timesyncd"
+        exit 1
+    fi
+
+    if ! systemctl start systemd-timesyncd; then
+        error_message "Failed to start systemd-timesyncd"
+        exit 1
+    fi
+
+    if ! timedatectl set-ntp true; then
+        error_message "Failed to enable NTP"
+        exit 1
+    fi
+
+    if ! timedatectl set-timezone Asia/Shanghai; then
+        error_message "Failed to set timezone"
+        exit 1
+    fi
+
+    timedatectl status
+
+    # Verify time settings
+    echo "Verifying time configuration..."
+
+    # Check time configuration in one step
+    if timedatectl status | grep -q "Time zone: Asia/Shanghai" &&
+        timedatectl status | grep -q "System clock synchronized: yes" &&
+        timedatectl status | grep -q "NTP service: active"; then
+        success_message "Time configuration is correct: Timezone is Asia/Shanghai, system clock synchronized, and NTP service is active"
+    else
+        error_message "Time configuration is incorrect. Please check the time zone, system clock synchronization, and NTP service."
+        exit 1
+    fi
+
+    # Only show success message after all checks pass
     success_message "Time configuration completed"
 }
 
 # Configure network settings
 configure_network() {
     echo "Configuring network settings..."
-    
+
     # Set hostname only if provided
     if [[ -n "$HOSTNAME" ]]; then
         echo "Setting hostname to: $HOSTNAME"
-        hostnamectl set-hostname "$HOSTNAME" >/dev/null 2>&1 || true
-        
+        if ! hostnamectl set-hostname "$HOSTNAME"; then
+            error_message "Failed to set hostname"
+            exit 1
+        fi
+
         # Configure hosts file
-        cat > /etc/hosts <<EOF
+        cat >/etc/hosts <<EOF
 127.0.0.1   localhost $HOSTNAME
 ::1         localhost $HOSTNAME
 EOF
     else
         echo "Hostname not provided, skipping hostname configuration"
     fi
-    
+
     # Configure DNS
-    cat > /etc/resolv.conf <<EOF
+    cat >/etc/resolv.conf <<EOF
 options timeout:2 attempts:3 rotate
 nameserver 1.1.1.1
 nameserver 1.0.0.1
 nameserver 2606:4700:4700::1111
 nameserver 2606:4700:4700::1001
 EOF
-    
+
     success_message "Network configuration completed"
 }
 
@@ -137,14 +197,14 @@ fi
 {
     success_message "Starting configuration script..."
     [[ -n "$HOSTNAME" ]] && echo -e "${GREEN}Using hostname: $HOSTNAME${RESET}"
-    
+
     configure_apt
     configure_ssh
     setup_ssh_keys
     install_packages
     configure_time
     configure_network
-    
+
     success_message "Configuration completed successfully!"
     echo -e "\n${GREEN}All tasks completed! System has been configured successfully.${RESET}\n"
 } || {
