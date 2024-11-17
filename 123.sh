@@ -28,8 +28,8 @@ EOF
 
     echo "5. 配置Root密码和SSH..."
     echo "root:${ROOT_PASSWORD}" | chpasswd
-    sed -i '/^#PermitRootLogin/c\PermitRootLogin yes' /etc/ssh/sshd_config
-    sed -i '/^#PasswordAuthentication/c\PasswordAuthentication yes' /etc/ssh/sshd_config
+    sed -i 's/^#?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+    sed -i 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
     echo "6. 配置SSH密钥..."
     mkdir -p /root/.ssh
@@ -40,7 +40,6 @@ EOF
     echo "7. 重启SSH服务..."
     systemctl restart sshd
 
-    # 如果提供了主机名参数，则设置主机名
     if [ $# -eq 1 ]; then
         echo "8. 设置主机名为: $1"
         hostnamectl set-hostname "$1"
