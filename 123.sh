@@ -28,8 +28,8 @@ EOF
 
     echo "5. 配置Root密码和SSH..."
     echo "root:${ROOT_PASSWORD}" | chpasswd
-    sed -i 's/^#?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-    sed -i 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+    sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+    sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
     echo "6. 配置SSH密钥..."
     mkdir -p /root/.ssh
