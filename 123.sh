@@ -30,6 +30,8 @@ EOF
     sed -i '/^[#]*PermitRootLogin/c\PermitRootLogin yes' /etc/ssh/sshd_config
     sed -i '/^[#]*PasswordAuthentication/c\PasswordAuthentication no' /etc/ssh/sshd_config
     sed -i '/^[#]*Port/c\Port 99' /etc/ssh/sshd_config
+    sudo sed -i.bak -E 's/^#?ClientAliveInterval.*/ClientAliveInterval 6/; s/^#?ClientAliveCountMax.*/ClientAliveCountMax 6/' /etc/ssh/sshd_config
+
     
     echo "6. 配置SSH密钥..."
     mkdir -p /root/.ssh
