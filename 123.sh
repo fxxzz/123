@@ -28,11 +28,11 @@ EOF
     
     # 修改SSH配置
     sudo sed -i -E \
-        's/^[#\s]*PermitRootLogin.*/PermitRootLogin yes/;' \
-        's/^[#\s]*PasswordAuthentication.*/PasswordAuthentication no/;' \
-        's/^[#\s]*Port.*/Port 99/;' \
-        's/^[#\s]*ClientAliveInterval.*/ClientAliveInterval 6/;' \
-        's/^[#\s]*ClientAliveCountMax.*/ClientAliveCountMax 6/' \
+        -e 's/^[#\s]*PermitRootLogin.*/PermitRootLogin yes/' \
+        -e 's/^[#\s]*PasswordAuthentication.*/PasswordAuthentication no/' \
+        -e 's/^[#\s]*Port.*/Port 99/' \
+        -e 's/^[#\s]*ClientAliveInterval.*/ClientAliveInterval 6/' \
+        -e 's/^[#\s]*ClientAliveCountMax.*/ClientAliveCountMax 6/' \
         /etc/ssh/sshd_config
     
     echo "6. 配置SSH密钥..."
