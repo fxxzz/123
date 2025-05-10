@@ -27,11 +27,13 @@ EOF
     echo "root:${ROOT_PASSWORD}" | chpasswd
     
     # 修改SSH配置
-    sed -i '/^[#]*PermitRootLogin/c\PermitRootLogin yes' /etc/ssh/sshd_config
-    sed -i '/^[#]*PasswordAuthentication/c\PasswordAuthentication no' /etc/ssh/sshd_config
-    sed -i '/^[#]*Port/c\Port 99' /etc/ssh/sshd_config
-    sudo sed -i.bak -E 's/^#?ClientAliveInterval.*/ClientAliveInterval 6/; s/^#?ClientAliveCountMax.*/ClientAliveCountMax 6/' /etc/ssh/sshd_config
-
+    sudo sed -i -E \
+        's/^[#\s]*PermitRootLogin.*/PermitRootLogin yes/;' \
+        's/^[#\s]*PasswordAuthentication.*/PasswordAuthentication no/;' \
+        's/^[#\s]*Port.*/Port 99/;' \
+        's/^[#\s]*ClientAliveInterval.*/ClientAliveInterval 6/;' \
+        's/^[#\s]*ClientAliveCountMax.*/ClientAliveCountMax 6/' \
+        /etc/ssh/sshd_config
     
     echo "6. 配置SSH密钥..."
     mkdir -p /root/.ssh
