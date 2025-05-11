@@ -14,10 +14,10 @@ EOF
     apt-get update
     apt-get install -y $PACKAGES
     
-    echo "3. 配置DNS (Cloudflare)..."
+    echo "3. 配置DNS..."
     cat > /etc/resolv.conf <<EOF
-nameserver 1.1.1.1
-nameserver 2606:4700:4700::1111
+nameserver 8.8.8.8
+nameserver 2001:4860:4860::8844
 EOF
     
     echo "4. 配置时区..."
