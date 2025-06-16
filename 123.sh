@@ -30,7 +30,6 @@ EOF
     sudo sed -i -E \
         -e 's/^[#\s]*PermitRootLogin.*/PermitRootLogin yes/' \
         -e 's/^[#\s]*PasswordAuthentication.*/PasswordAuthentication no/' \
-        -e 's/^[#\s]*Port.*/Port 99/' \
         -e 's/^[#\s]*ClientAliveInterval.*/ClientAliveInterval 6/' \
         -e 's/^[#\s]*ClientAliveCountMax.*/ClientAliveCountMax 6/' \
         /etc/ssh/sshd_config
