@@ -14,8 +14,18 @@ nameserver 8.8.8.8
 nameserver 2001:4860:4860::8844
 EOF
 
-echo "4. 配置时区..."
+echo "4. 配置语言环境、时区并启用时间同步..."
+# 设置 locale
+sed -i 's/^#\s*en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+locale-gen
+
+# 设置时区
 timedatectl set-timezone Asia/Hong_Kong
+
+# 启用并启动时间同步服务
+systemctl enable systemd-timesyncd
+systemctl start systemd-timesyncd
 
 echo "5. 设置 root 密码、SSH 密钥并重启 SSH..."
 echo "root:XXZZea" | chpasswd
