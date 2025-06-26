@@ -10,13 +10,13 @@ cat > /etc/resolv.conf <<EOF
 nameserver 8.8.8.8
 nameserver 2001:4860:4860::8844
 EOF
-    
+
 echo "3. 配置时区..."
 timedatectl set-timezone Asia/Hong_Kong
 
 echo "4. 配置Root密码和SSH..."
 echo "root:XXZZea" | chpasswd
-    
+
 # 修改SSH配置
 sudo sed -i -E \
     -e 's/^[#\s]*PermitRootLogin.*/PermitRootLogin yes/' \
@@ -42,4 +42,17 @@ if [ $# -eq 1 ]; then
 ::1         localhost $1
 EOF
 fi
+
+echo "8. 配置 systemd-journald 日志策略..."
+tee /etc/systemd/journald.conf > /dev/null <<EOF
+[Journal]
+Storage=persistent
+SystemMaxUse=500M
+SystemMaxFileSize=100M
+SystemKeepFree=100M
+MaxRetentionSec=1week
+EOF
+
+systemctl restart systemd-journald
+
 echo "配置完成!"
