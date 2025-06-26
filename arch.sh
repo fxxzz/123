@@ -56,4 +56,11 @@ EOF
 
 systemctl restart systemd-journald
 
+echo "7. 配置 root 的 .bash_profile 加载 .bashrc..."
+cat > /root/.bash_profile <<'EOF'
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+EOF
+
 echo "配置完成!"
