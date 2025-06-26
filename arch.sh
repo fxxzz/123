@@ -56,11 +56,9 @@ EOF
 
 systemctl restart systemd-journald
 
-echo "7. 配置 root 的 .bash_profile 加载 .bashrc..."
-cat > /root/.bash_profile <<'EOF'
-if [ -f ~/.bashrc ]; then
-    . ~/.bashrc
-fi
-EOF
+echo "7. 复制 /etc/skel 中的隐藏配置文件到 /root 并修改权限..."
+cp -r /etc/skel/.[!.]* /root/
+chown root:root /root/.[!.]*
+
 
 echo "配置完成!"
