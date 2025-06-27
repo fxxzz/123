@@ -54,8 +54,24 @@ MaxRetentionSec=1week
 EOF
 systemctl restart systemd-journald
 
-echo "7. 复制 /etc/skel 中的隐藏配置文件到 /root 并修改权限..."
-cp -r /etc/skel/.[!.]* /root/
-chown root:root /root/.[!.]*
+echo "7. 创建 bash 配置文件..."
+# 创建 .bash_profile
+cat > /root/.bash_profile <<'EOF'
+[[ -f ~/.bashrc ]] && . ~/.bashrc
+EOF
+
+# 创建 .bashrc
+cat > /root/.bashrc <<'EOF'
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+PS1='[\u@\h \W]\$ '
+alias c='echo -e "\e[41m \e[41m \e[41m \e[40m \e[44m \e[40m \e[41m \e[46m \e[45m \e[41m \e[46m \e[43m \e[41m \e[44m \e[45m \e[40m \e[44m \e[40m \e[41m \e[44m \e[41m \e[41m \e[46m \e[42m \e[41m \e[44m \e[43m \e[41m \e[45m \e[40m \e[40m \e[44m \e[40m \e[41m \e[44m \e[42m \e[41m \e[46m \e[44m \e[41m \e[46m \e[47m \e[0m"'
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+EOF
 
 echo "配置完成!"
