@@ -74,4 +74,7 @@ alias la='ls -A'
 alias l='ls -CF'
 EOF
 
+# 立即加载配置
+source ~/.bashrc
+
 echo "配置完成!"
