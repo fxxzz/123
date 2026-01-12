@@ -1,8 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "1. 修改 pacman 配置启用 VerbosePkgLists..."
+echo "1. 修改 pacman 配置..."
 sed -i 's/^#VerbosePkgLists/VerbosePkgLists/' /etc/pacman.conf
+sudo sed -i 's/^#\?CleanMethod.*/CleanMethod = KeepInstalled/' /etc/pacman.conf
 
 echo "2. 安装基础软件包..."
 pacman -Syu --noconfirm
