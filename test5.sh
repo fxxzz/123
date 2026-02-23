@@ -3,12 +3,7 @@
 set -e
 trap 'echo "Error on line $LINENO. Script aborted."; exit 1' ERR
 
-echo "Configuring host environment..."
-echo "root:XXZZea" | chpasswd
-sed -i 's/^#\(PermitRootLogin\).*/\1 yes/' /etc/ssh/sshd_config
-systemctl restart sshd
-
-echo "Partitioning and formatting /dev/vda..."
+echo "1. Partitioning and formatting /dev/vda..."
 wipefs -a /dev/vda
 sgdisk --zap-all /dev/vda
 
@@ -24,18 +19,17 @@ mount /dev/vda2 /mnt
 mkdir -p /mnt/boot
 mount /dev/vda1 /mnt/boot
 
-echo "Installing base system..."
+echo "2. Installing base system..."
 pacstrap -K /mnt base linux linux-firmware openssh reflector grub efibootmgr vim wget sudo htop cronie base-devel curl
 genfstab -U /mnt >> /mnt/etc/fstab
 
-echo "Preparing chroot script..."
+echo "3. Preparing chroot script..."
 cat > /mnt/setup_inside.sh << 'CHROOT_EOF'
 set -e
 
 systemctl enable systemd-networkd systemd-resolved
 
-rm -f /etc/resolv.conf
-ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+awk 'BEGIN { print "nameserver 1.1.1.1" }' > /etc/resolv.conf
 
 echo "arch" > /etc/hostname
 ln -sf /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
@@ -81,12 +75,14 @@ echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIN4uOC31nqauqW85lC1B4jnO4HGmGxrJC+4r7
 chmod 600 /root/.ssh/authorized_keys
 CHROOT_EOF
 
-echo "Entering chroot environment..."
+echo "4. Entering chroot environment..."
 chmod +x /mnt/setup_inside.sh
-umount /mnt/etc/resolv.conf || true 
+
+umount /etc/resolv.conf || true
+
 arch-chroot /mnt /bin/bash /setup_inside.sh
 
-echo "Finalizing installation..."
+echo "5. Finalizing installation..."
 rm /mnt/setup_inside.sh
 sync
 umount -R /mnt
