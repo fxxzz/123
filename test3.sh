@@ -38,8 +38,8 @@ set -e
 
 # 基础服务与 DNS
 systemctl enable systemd-networkd systemd-resolved
+rm -f /etc/resolv.conf
 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-
 # 基础设置
 echo "arch" > /etc/hostname
 ln -sf /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
