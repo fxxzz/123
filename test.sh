@@ -10,12 +10,14 @@ sed -i 's/^#\(PermitRootLogin\).*/\1 yes/' /etc/ssh/sshd_config
 systemctl restart sshd
 
 echo "--- 2. 自动化分区与格式化 ---"
-# 抹除旧分区表
+# 1. 彻底抹除磁盘上的所有分区表和文件系统签名
+wipefs -a /dev/vda
 sgdisk --zap-all /dev/vda
 
-# 分区逻辑：1G EFI 分区，剩余全部给 Root
-# GUID 说明：C12A... 为 EFI，4F68... 为 Linux Root
-printf "label: gpt\nsize=1024M, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B\n, , type=4F68BCE3-E8CD-4DB1-96E7-FBCAF974B709\n" | sfdisk /dev/vda
+# 2. 重新分区 (使用更稳定的单行 echo 方式)
+echo "label: gpt
+size=1G, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B
+type=4F68BCE3-E8CD-4DB1-96E7-FBCAF974B709" | sfdisk /dev/vda
 
 # 刷新分区表并格式化
 partprobe /dev/vda
