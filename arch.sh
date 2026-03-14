@@ -48,10 +48,10 @@ echo "6. 配置 systemd-journald 日志策略..."
 tee /etc/systemd/journald.conf > /dev/null <<EOF
 [Journal]
 Storage=persistent
-SystemMaxUse=50M
-SystemMaxFileSize=10M
-SystemKeepFree=10M
-MaxRetentionSec=1week
+SystemMaxUse=500M
+SystemMaxFileSize50M
+SystemKeepFree=100M
+MaxRetentionSec=1month
 EOF
 systemctl restart systemd-journald
 
