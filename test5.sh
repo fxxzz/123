@@ -56,8 +56,6 @@ initrd /initramfs-linux.img
 options root=PARTLABEL=root rw
 EOF
 
-sed -i 's/^#\(PermitRootLogin\).*/\1 yes/' /etc/ssh/sshd_config
-
 mkdir -p /root/.ssh && chmod 700 /root/.ssh
 echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIN4uOC31nqauqW85lC1B4jnO4HGmGxrJC+4r7vMBzb2" > /root/.ssh/authorized_keys
 chmod 600 /root/.ssh/authorized_keys
