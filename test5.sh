@@ -37,7 +37,6 @@ ln -sf /usr/bin/vim /usr/bin/vi
 sed -i 's/^#\s*en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf
-echo 'KEYMAP=us' > /etc/vconsole.conf
 
 mkdir -p /etc/systemd/network
 cat > /etc/systemd/network/20-ethernet.network << 'EOF'
@@ -77,8 +76,6 @@ linux /vmlinuz-linux
 initrd /initramfs-linux.img
 options root=PARTLABEL=root rw
 EOF
-
-mkinitcpio -P
 
 echo "root:XXZZea" | chpasswd
 sed -i 's/^#\(PermitRootLogin\).*/\1 yes/' /etc/ssh/sshd_config
