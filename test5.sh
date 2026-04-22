@@ -20,7 +20,7 @@ mkdir -p /mnt/boot
 mount /dev/vda1 /mnt/boot
 
 echo "2. Installing base system..."
-pacstrap -K /mnt base linux linux-firmware openssh reflector grub efibootmgr vim wget sudo htop cronie base-devel curl
+pacstrap -K /mnt base linux openssh reflector grub efibootmgr vim wget sudo htop cronie curl
 genfstab -U /mnt >> /mnt/etc/fstab
 
 echo "3. Preparing chroot script..."
