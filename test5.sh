@@ -30,8 +30,6 @@ set -e
 
 systemctl enable systemd-networkd systemd-resolved
 
-ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-
 echo "arch" > /etc/hostname
 ln -sf /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
 ln -sf /usr/bin/vim /usr/bin/vi
@@ -39,6 +37,7 @@ ln -sf /usr/bin/vim /usr/bin/vi
 sed -i 's/^#\s*en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+echo 'KEYMAP=us' > /etc/vconsole.conf
 
 mkdir -p /etc/systemd/network
 cat > /etc/systemd/network/20-ethernet.network << 'EOF'
