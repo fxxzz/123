@@ -9,12 +9,6 @@ echo "2. 安装基础软件包..."
 pacman -Syu --noconfirm
 pacman -S --noconfirm sudo curl wget vim htop
 
-echo "3. 配置DNS..."
-cat > /etc/resolv.conf <<EOF
-nameserver 1.1.1.1
-nameserver 2606:4700:4700::1111
-EOF
-
 echo "4. 配置语言环境、时区并启用时间同步..."
 # 设置 locale
 sed -i 's/^#\s*en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
@@ -49,7 +43,7 @@ tee /etc/systemd/journald.conf > /dev/null <<EOF
 [Journal]
 Storage=persistent
 SystemMaxUse=500M
-SystemMaxFileSize50M
+SystemMaxFileSize=50M
 SystemKeepFree=100M
 MaxRetentionSec=1month
 EOF
