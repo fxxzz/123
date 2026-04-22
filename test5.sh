@@ -7,7 +7,7 @@ echo "1. Partitioning and formatting /dev/vda..."
 wipefs -a /dev/vda
 sgdisk --zap-all /dev/vda
 
-echo -e "label: gpt\nsize=1G, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B\ntype=4F68BCE3-E8CD-4DB1-96E7-FBCAF974B709" | sfdisk /dev/vda
+echo -e "label: gpt\nsize=1G, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B\ntype=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709" | sfdisk /dev/vda
 
 partprobe /dev/vda
 sleep 2
