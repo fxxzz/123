@@ -65,8 +65,6 @@ echo "4. Entering chroot environment..."
 chmod +x /mnt/setup_inside.sh
 arch-chroot /mnt /bin/bash /setup_inside.sh
 
-umount /mnt/etc/resolv.conf || true
-
 cat > /mnt/etc/resolv.conf <<'EOF'
 nameserver 1.1.1.1
 nameserver 2606:4700:4700::1111
