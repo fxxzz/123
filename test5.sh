@@ -7,13 +7,14 @@ echo "1. Partitioning and formatting /dev/vda..."
 wipefs -a /dev/vda
 sgdisk --zap-all /dev/vda
 
-echo -e "label: gpt\nsize=1G, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B\ntype=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709" | sfdisk /dev/vda
+echo -e "label: gpt\nsize=1G, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name=boot\ntype=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709, name=root" | sfdisk /dev/vda
 
 partprobe /dev/vda
 sleep 2
 
-mkfs.fat -F 32 /dev/vda1
-mkfs.ext4 -F /dev/vda2
+mkfs.fat -F 32 -n BOOT /dev/vda1
+mkfs.ext4 -F -L root /dev/vda2
+
 
 mount /dev/vda2 /mnt
 mkdir -p /mnt/boot
@@ -29,7 +30,7 @@ set -e
 
 systemctl enable systemd-networkd systemd-resolved
 
-awk 'BEGIN { print "nameserver 1.1.1.1" }' > /etc/resolv.conf
+ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
 echo "arch" > /etc/hostname
 ln -sf /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
@@ -42,13 +43,13 @@ echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 mkdir -p /etc/systemd/network
 cat > /etc/systemd/network/20-ethernet.network << 'EOF'
 [Match]
-Name=en*
-Name=eth*
+Name=en* eth*
 [Network]
 DHCP=ipv4
 Address=2a03:4000:27:f0d::1/64
 Gateway=fe80::1
 DNS=1.1.1.1
+DNS=2606:4700:4700::1111
 EOF
 
 mkdir -p /etc/xdg/reflector
@@ -68,17 +69,14 @@ bootctl install
 cat > /boot/loader/loader.conf << 'EOF'
 default arch.conf
 timeout 3
-console-mode max
 editor no
 EOF
 
-ROOT_UUID=$(blkid -s UUID -o value /dev/vda2)
-
-cat > /boot/loader/entries/arch.conf << EOF
+cat > /boot/loader/entries/arch.conf << 'EOF'
 title Arch Linux
 linux /vmlinuz-linux
 initrd /initramfs-linux.img
-options root=UUID=${ROOT_UUID} rw
+options root=PARTLABEL=root rw
 EOF
 
 
