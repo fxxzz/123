@@ -25,7 +25,6 @@ locale-gen
 echo 'KEYMAP=us' > /etc/vconsole.conf
 
 timedatectl set-timezone Asia/Hong_Kong
-
 systemctl enable --now systemd-timesyncd
 
 echo "5. 设置 root 密码、SSH 密钥并重启 SSH..."
@@ -37,12 +36,9 @@ chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 
 sed -i -E \
-    -e 's/^[#[:space:]]*PermitRootLogin.*/PermitRootLogin yes/' \
-    -e 's/^[#[:space:]]*PasswordAuthentication.*/PasswordAuthentication no/' \
     -e 's/^[#[:space:]]*ClientAliveInterval.*/ClientAliveInterval 6/' \
     -e 's/^[#[:space:]]*ClientAliveCountMax.*/ClientAliveCountMax 6/' \
     /etc/ssh/sshd_config
-
 systemctl restart sshd
 
 echo "6. 配置 systemd-journald 日志策略..."
