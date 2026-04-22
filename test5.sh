@@ -20,7 +20,7 @@ mkdir -p /mnt/boot
 mount /dev/vda1 /mnt/boot
 
 echo "2. Installing base system..."
-pacstrap -K /mnt base linux openssh reflector grub efibootmgr vim wget sudo htop cronie curl
+pacstrap -K /mnt base linux openssh reflector vim wget sudo htop cronie curl
 genfstab -U /mnt >> /mnt/etc/fstab
 
 echo "3. Preparing chroot script..."
@@ -63,8 +63,24 @@ EOF
 
 systemctl enable sshd cronie reflector.timer
 
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable --recheck
-grub-mkconfig -o /boot/grub/grub.cfg
+bootctl install
+
+cat > /boot/loader/loader.conf << 'EOF'
+default arch.conf
+timeout 3
+console-mode max
+editor no
+EOF
+
+ROOT_UUID=$(blkid -s UUID -o value /dev/vda2)
+
+cat > /boot/loader/entries/arch.conf << EOF
+title Arch Linux
+linux /vmlinuz-linux
+initrd /initramfs-linux.img
+options root=UUID=${ROOT_UUID} rw
+EOF
+
 
 echo "root:XXZZea" | chpasswd
 sed -i 's/^#\(PermitRootLogin\).*/\1 yes/' /etc/ssh/sshd_config
