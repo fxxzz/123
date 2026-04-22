@@ -3,24 +3,30 @@ set -euo pipefail
 
 echo "1. 修改 pacman 配置..."
 sed -i 's/^#VerbosePkgLists/VerbosePkgLists/' /etc/pacman.conf
-sudo sed -i 's/^#\?CleanMethod.*/CleanMethod = KeepInstalled/' /etc/pacman.conf
+sed -i 's/^#\?CleanMethod.*/CleanMethod = KeepInstalled/' /etc/pacman.conf
+cat > /etc/pacman.d/mirrorlist <<'EOF'
+Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch
+EOF
 
-echo "2. 安装基础软件包..."
+echo "2. 配置 systemd-resolved 和 DNS..."
+systemctl enable --now systemd-resolved
+rm -f /etc/resolv.conf
+ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+
+echo "3. 安装基础软件包..."
 pacman -Syu --noconfirm
-pacman -S --noconfirm sudo curl wget vim htop
+pacman -S --noconfirm curl wget vim htop cronie
+systemctl enable --now cronie
 
 echo "4. 配置语言环境、时区并启用时间同步..."
-# 设置 locale
 sed -i 's/^#\s*en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 locale-gen
+echo 'KEYMAP=us' > /etc/vconsole.conf
 
-# 设置时区
 timedatectl set-timezone Asia/Hong_Kong
 
-# 启用并启动时间同步服务
-systemctl enable systemd-timesyncd
-systemctl start systemd-timesyncd
+systemctl enable --now systemd-timesyncd
 
 echo "5. 设置 root 密码、SSH 密钥并重启 SSH..."
 echo "root:XXZZea" | chpasswd
@@ -31,15 +37,16 @@ chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 
 sed -i -E \
-    -e 's/^[#\s]*PermitRootLogin.*/PermitRootLogin yes/' \
-    -e 's/^[#\s]*PasswordAuthentication.*/PasswordAuthentication no/' \
-    -e 's/^[#\s]*ClientAliveInterval.*/ClientAliveInterval 6/' \
-    -e 's/^[#\s]*ClientAliveCountMax.*/ClientAliveCountMax 6/' \
+    -e 's/^[#[:space:]]*PermitRootLogin.*/PermitRootLogin yes/' \
+    -e 's/^[#[:space:]]*PasswordAuthentication.*/PasswordAuthentication no/' \
+    -e 's/^[#[:space:]]*ClientAliveInterval.*/ClientAliveInterval 6/' \
+    -e 's/^[#[:space:]]*ClientAliveCountMax.*/ClientAliveCountMax 6/' \
     /etc/ssh/sshd_config
+
 systemctl restart sshd
 
 echo "6. 配置 systemd-journald 日志策略..."
-tee /etc/systemd/journald.conf > /dev/null <<EOF
+cat > /etc/systemd/journald.conf <<'EOF'
 [Journal]
 Storage=persistent
 SystemMaxUse=500M
@@ -50,12 +57,10 @@ EOF
 systemctl restart systemd-journald
 
 echo "7. 创建 bash 配置文件..."
-# 创建 .bash_profile
 cat > /root/.bash_profile <<'EOF'
 [[ -f ~/.bashrc ]] && . ~/.bashrc
 EOF
 
-# 创建 .bashrc
 cat > /root/.bashrc <<'EOF'
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
@@ -66,7 +71,6 @@ alias la='ls -A'
 alias l='ls -CF'
 EOF
 
-# 立即加载配置
 source ~/.bashrc
 
 echo "配置完成!"
