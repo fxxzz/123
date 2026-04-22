@@ -15,28 +15,19 @@ sleep 2
 mkfs.fat -F 32 -n BOOT /dev/vda1
 mkfs.ext4 -F -L root /dev/vda2
 
-
 mount /dev/vda2 /mnt
 mkdir -p /mnt/boot
 mount /dev/vda1 /mnt/boot
 
 echo "2. Installing base system..."
-pacstrap -K /mnt base linux openssh reflector vim wget sudo htop cronie curl
+pacstrap -K /mnt base linux openssh sudo curl
 genfstab -U /mnt >> /mnt/etc/fstab
 
 echo "3. Preparing chroot script..."
 cat > /mnt/setup_inside.sh << 'CHROOT_EOF'
 set -e
 
-systemctl enable systemd-networkd systemd-resolved
-
-echo "arch" > /etc/hostname
-ln -sf /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
-ln -sf /usr/bin/vim /usr/bin/vi
-
-sed -i 's/^#\s*en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
-locale-gen
-echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+systemctl enable systemd-networkd sshd
 
 mkdir -p /etc/systemd/network
 cat > /etc/systemd/network/20-ethernet.network << 'EOF'
@@ -49,18 +40,6 @@ Gateway=fe80::1
 DNS=1.1.1.1
 DNS=2606:4700:4700::1111
 EOF
-
-mkdir -p /etc/xdg/reflector
-cat > /etc/xdg/reflector/reflector.conf << 'EOF'
---save /etc/pacman.d/mirrorlist
---protocol https
---sort rate
---country 'United States'
---latest 20
--n 10
-EOF
-
-systemctl enable sshd cronie reflector.timer
 
 bootctl install
 
@@ -77,9 +56,7 @@ initrd /initramfs-linux.img
 options root=PARTLABEL=root rw
 EOF
 
-echo "root:XXZZea" | chpasswd
 sed -i 's/^#\(PermitRootLogin\).*/\1 yes/' /etc/ssh/sshd_config
-sed -i 's/^#\(PasswordAuthentication\).*/\1 yes/' /etc/ssh/sshd_config
 
 mkdir -p /root/.ssh && chmod 700 /root/.ssh
 echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIN4uOC31nqauqW85lC1B4jnO4HGmGxrJC+4r7vMBzb2" > /root/.ssh/authorized_keys
@@ -89,10 +66,6 @@ CHROOT_EOF
 echo "4. Entering chroot environment..."
 chmod +x /mnt/setup_inside.sh
 arch-chroot /mnt /bin/bash /setup_inside.sh
-
-rm -f /mnt/etc/resolv.conf
-ln -s /run/systemd/resolve/stub-resolv.conf /mnt/etc/resolv.conf
-
 
 echo "5. Finalizing installation..."
 rm /mnt/setup_inside.sh
