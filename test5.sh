@@ -78,6 +78,7 @@ initrd /initramfs-linux.img
 options root=PARTLABEL=root rw
 EOF
 
+mkinitcpio -P
 
 echo "root:XXZZea" | chpasswd
 sed -i 's/^#\(PermitRootLogin\).*/\1 yes/' /etc/ssh/sshd_config
@@ -90,10 +91,11 @@ CHROOT_EOF
 
 echo "4. Entering chroot environment..."
 chmod +x /mnt/setup_inside.sh
-
-umount /etc/resolv.conf || true
-
 arch-chroot /mnt /bin/bash /setup_inside.sh
+
+rm -f /mnt/etc/resolv.conf
+ln -s /run/systemd/resolve/stub-resolv.conf /mnt/etc/resolv.conf
+
 
 echo "5. Finalizing installation..."
 rm /mnt/setup_inside.sh
