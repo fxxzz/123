@@ -56,7 +56,9 @@ initrd /initramfs-linux.img
 options root=PARTLABEL=root rw
 EOF
 
-timedatectl set-timezone Asia/Hong_Kong
+ln -sf /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
+systemctl enable systemd-timesyncd
+
 locale-gen en_US.UTF-8
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 echo 'KEYMAP=us' > /etc/vconsole.conf
