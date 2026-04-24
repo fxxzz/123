@@ -3,12 +3,16 @@
 set -e
 trap 'echo "Error on line $LINENO. Script aborted."; exit 1' ERR
 
-echo "1. Partitioning and formatting /dev/vda..."
+echo "1. Partitioning /dev/vda and formatting filesystems..."
 
 swapoff -a 2>/dev/null || true
 umount -R /mnt 2>/dev/null || true
 
-echo -e "label: gpt\nsize=1G, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name=boot\ntype=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709, name=root" | sfdisk /dev/vda
+sfdisk /dev/vda <<'EOF'
+label: gpt
+size=1G, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name=boot
+type=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709, name=root
+EOF
 
 partprobe /dev/vda
 
@@ -19,15 +23,17 @@ mount /dev/vda2 /mnt
 mkdir -p /mnt/boot
 mount /dev/vda1 /mnt/boot
 
-echo "2. Installing base system..."
+echo "2. Installing Arch base system to /mnt..."
+
 pacstrap -K /mnt base linux openssh sudo
 genfstab -U /mnt >> /mnt/etc/fstab
 
-echo "3. Preparing chroot script..."
+echo "3. Creating chroot setup script..."
+
 cat > /mnt/setup_inside.sh << 'CHROOT_EOF'
 set -e
 
-systemctl enable systemd-networkd sshd
+systemctl enable systemd-networkd sshd systemd-timesyncd
 
 mkdir -p /etc/systemd/network
 cat > /etc/systemd/network/20-ethernet.network << 'EOF'
@@ -57,8 +63,6 @@ options root=PARTLABEL=root rw
 EOF
 
 ln -sf /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
-systemctl enable systemd-timesyncd
-
 locale-gen en_US.UTF-8
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 echo 'KEYMAP=us' > /etc/vconsole.conf
@@ -67,19 +71,22 @@ mkdir -p /root/.ssh
 echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIN4uOC31nqauqW85lC1B4jnO4HGmGxrJC+4r7vMBzb2" > /root/.ssh/authorized_keys
 chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
-
 CHROOT_EOF
 
-echo "4. Entering chroot environment..."
+echo "4. Running chroot setup: bootloader, network, locale, timezone and SSH..."
+
 chmod +x /mnt/setup_inside.sh
 arch-chroot /mnt /bin/bash /setup_inside.sh
+
+echo "5. Writing DNS resolver config..."
 
 cat > /mnt/etc/resolv.conf <<'EOF'
 nameserver 1.1.1.1
 nameserver 2606:4700:4700::1111
 EOF
 
-echo "5. Finalizing installation..."
+echo "6. Cleaning up, unmounting and rebooting..."
+
 rm /mnt/setup_inside.sh
 sync
 umount -R /mnt
