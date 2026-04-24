@@ -16,7 +16,7 @@ ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
 echo "3. 安装基础软件包..."
 pacman -Syu --noconfirm
-pacman -S --noconfirm wget vim htop cronie
+pacman -S --noconfirm vim htop cronie
 systemctl enable --now cronie
 
 echo "4. 配置语言环境、时区并启用时间同步..."
