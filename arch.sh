@@ -16,7 +16,7 @@ ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
 echo "3. 安装基础软件包..."
 pacman -Syu --noconfirm
-pacman -S --noconfirm curl wget vim htop cronie
+pacman -S --noconfirm wget vim htop cronie
 systemctl enable --now cronie
 
 echo "4. 配置语言环境、时区并启用时间同步..."
@@ -62,10 +62,11 @@ cat > /root/.bashrc <<'EOF'
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 PS1='[\u@\h \W]\$ '
-alias c='echo -e "\e[41m \e[41m \e[41m \e[40m \e[44m \e[40m \e[41m \e[46m \e[45m \e[41m \e[46m \e[43m \e[41m \e[44m \e[45m \e[40m \e[44m \e[40m \e[41m \e[44m \e[41m \e[41m \e[46m \e[42m \e[41m \e[44m \e[43m \e[41m \e[45m \e[40m \e[40m \e[44m \e[40m \e[41m \e[44m \e[42m \e[41m \e[46m \e[44m \e[41m \e[46m \e[47m \e[0m"'
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+export EDITOR=vim
+export VISUAL=vim
 EOF
 
 source ~/.bashrc
