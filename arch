@@ -37,6 +37,7 @@ EOF
 systemctl restart systemd-journald
 
 echo "5. 创建 bash 配置文件..."
+
 cat > /root/.bash_profile <<'EOF'
 [[ -f ~/.bashrc ]] && . ~/.bashrc
 EOF
