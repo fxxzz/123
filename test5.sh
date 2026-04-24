@@ -63,7 +63,8 @@ options root=PARTLABEL=root rw
 EOF
 
 ln -sf /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
-locale-gen en_US.UTF-8
+sed -i 's/^#\s*en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+locale-gen
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 echo 'KEYMAP=us' > /etc/vconsole.conf
 
