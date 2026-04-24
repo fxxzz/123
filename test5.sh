@@ -5,8 +5,8 @@ trap 'echo "Error on line $LINENO. Script aborted."; exit 1' ERR
 
 echo "1. Partitioning and formatting /dev/vda..."
 
-swapoff -a
-umount -R /mnt
+swapoff -a 2>/dev/null || true
+umount -R /mnt 2>/dev/null || true
 
 echo -e "label: gpt\nsize=1G, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name=boot\ntype=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709, name=root" | sfdisk /dev/vda
 
@@ -56,9 +56,16 @@ initrd /initramfs-linux.img
 options root=PARTLABEL=root rw
 EOF
 
-mkdir -p /root/.ssh && chmod 700 /root/.ssh
+timedatectl set-timezone Asia/Hong_Kong
+locale-gen en_US.UTF-8
+echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+echo 'KEYMAP=us' > /etc/vconsole.conf
+
+mkdir -p /root/.ssh
 echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIN4uOC31nqauqW85lC1B4jnO4HGmGxrJC+4r7vMBzb2" > /root/.ssh/authorized_keys
+chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
+
 CHROOT_EOF
 
 echo "4. Entering chroot environment..."
