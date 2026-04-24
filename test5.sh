@@ -4,13 +4,13 @@ set -e
 trap 'echo "Error on line $LINENO. Script aborted."; exit 1' ERR
 
 echo "1. Partitioning and formatting /dev/vda..."
-wipefs -a /dev/vda
-sgdisk --zap-all /dev/vda
+
+swapoff -a
+umount -R /mnt
 
 echo -e "label: gpt\nsize=1G, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name=boot\ntype=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709, name=root" | sfdisk /dev/vda
 
 partprobe /dev/vda
-sleep 2
 
 mkfs.fat -F 32 -n BOOT /dev/vda1
 mkfs.ext4 -F -L root /dev/vda2
@@ -20,7 +20,7 @@ mkdir -p /mnt/boot
 mount /dev/vda1 /mnt/boot
 
 echo "2. Installing base system..."
-pacstrap -K /mnt base linux openssh sudo curl
+pacstrap -K /mnt base linux openssh sudo
 genfstab -U /mnt >> /mnt/etc/fstab
 
 echo "3. Preparing chroot script..."
