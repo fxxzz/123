@@ -6,8 +6,7 @@ echo "1. 修改 pacman 配置..."
 sed -i 's/^#VerbosePkgLists/VerbosePkgLists/' /etc/pacman.conf
 sed -i 's/^#\?CleanMethod.*/CleanMethod = KeepInstalled/' /etc/pacman.conf
 sed -i 's/^#Color/Color/' /etc/pacman.conf
-grep -q '^ILoveCandy$' /etc/pacman.conf || \
-sed -i '/^\[options\]/a ILoveCandy' /etc/pacman.conf
+grep -q '^ILoveCandy$' /etc/pacman.conf || sed -i '/^\[options\]/a ILoveCandy' /etc/pacman.conf
 
 cat > /etc/pacman.d/mirrorlist <<'EOF'
 Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch
