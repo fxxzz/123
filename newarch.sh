@@ -20,8 +20,8 @@ EOF
 echo "3. 安装基础软件包..."
 
 pacman -Syu --noconfirm
-pacman -S --noconfirm vim htop cronie sudo
-systemctl enable --now cronie
+pacman -S --noconfirm vim htop cronie sudo pacman-contrib
+systemctl enable --now cronie paccache.timer
 
 echo "4. 配置语言环境、时区并启用时间同步..."
 
@@ -41,7 +41,7 @@ chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 
 sed -i -E \
-    -e 's/^[#[:space:]]*ClientAliveInterval.*/ClientAliveInterval 6/' \
+    -e 's/^[#[:space:]]*ClientAliveInterval.*/ClientAliveInterval 60/' \
     -e 's/^[#[:space:]]*ClientAliveCountMax.*/ClientAliveCountMax 6/' \
     /etc/ssh/sshd_config
 systemctl restart sshd

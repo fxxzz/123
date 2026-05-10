@@ -13,13 +13,13 @@ EOF
 echo "2. 安装基础软件包..."
 
 pacman -Syu --noconfirm
-pacman -S --noconfirm vim htop cronie
-systemctl enable --now cronie
+pacman -S --noconfirm vim htop cronie pacman-contrib
+systemctl enable --now cronie paccache.timer
 
 echo "3. 设置SSH..."
 
 sed -i -E \
-    -e 's/^[#[:space:]]*ClientAliveInterval.*/ClientAliveInterval 6/' \
+    -e 's/^[#[:space:]]*ClientAliveInterval.*/ClientAliveInterval 60/' \
     -e 's/^[#[:space:]]*ClientAliveCountMax.*/ClientAliveCountMax 6/' \
     /etc/ssh/sshd_config
 systemctl restart sshd
