@@ -69,7 +69,7 @@ echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 echo 'KEYMAP=us' > /etc/vconsole.conf
 
 mkdir -p /root/.ssh
-echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIN4uOC31nqauqW85lC1B4jnO4HGmGxrJC+4r7vMBzb2" > /root/.ssh/authorized_keys
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILrIoLqJzTVKV5G+P7BPesXX21cJjRu9CrUDl3xNEvO/" > /root/.ssh/authorized_keys
 chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 CHROOT_EOF
