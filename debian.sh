@@ -2,7 +2,7 @@
 set -euo pipefail
 PACKAGES="sudo curl wget vim htop"
 ROOT_PASSWORD="XXZZea"
-SSH_PUBLIC_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIN4uOC31nqauqW85lC1B4jnO4HGmGxrJC+4r7vMBzb2"
+SSH_PUBLIC_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILrIoLqJzTVKV5G+P7BPesXX21cJjRu9CrUDl3xNEvO/"
 
 configure_system() {
     echo "1. 配置APT..."
